@@ -9,8 +9,8 @@
 <style>
 
 body{
-font-family:'Jua', sans-serif;
-background:#f4f9ff;
+font-family:'Jua',sans-serif;
+background:#f2f8ff;
 text-align:center;
 margin:0;
 }
@@ -18,49 +18,71 @@ margin:0;
 h1{
 font-size:48px;
 color:#ff6b6b;
-margin-top:30px;
+margin-top:20px;
 }
 
 #upload{
-margin:20px;
+margin:15px;
+font-size:16px;
 }
 
-table{
+#grid{
 width:90%;
 margin:auto;
-border-collapse:collapse;
-}
-
-td{
-padding:12px;
-font-size:20px;
-}
-
-.student{
-display:flex;
-align-items:center;
+display:grid;
+grid-template-columns:repeat(8,1fr);
+grid-template-rows:repeat(4,120px);
 gap:10px;
+}
+
+.card{
+
+background:white;
+border-radius:20px;
+padding:10px;
 cursor:pointer;
-padding:8px;
-border-radius:15px;
+display:flex;
+flex-direction:column;
+align-items:center;
+justify-content:center;
+
 transition:0.2s;
 }
 
-.student:hover{
+.card:hover{
+transform:scale(1.05);
 background:#ffeaa7;
-transform:scale(1.03);
 }
 
 .avatar{
-width:40px;
-height:40px;
+width:60px;
+height:60px;
 border-radius:50%;
+margin-bottom:5px;
+}
+
+.name{
+font-size:18px;
 }
 
 .count{
 color:#0984e3;
-font-size:18px;
-margin-left:10px;
+font-size:16px;
+}
+
+/* TOP3 효과 */
+
+.top{
+animation:glow 1.5s infinite alternate;
+}
+
+@keyframes glow{
+from{
+box-shadow:0 0 10px #ffd700;
+}
+to{
+box-shadow:0 0 25px #ffd700;
+}
 }
 
 </style>
@@ -72,7 +94,7 @@ margin-left:10px;
 
 <input type="file" id="upload" accept=".csv">
 
-<table id="table"></table>
+<div id="grid"></div>
 
 <button onclick="downloadCSV()">저장하기</button>
 
@@ -81,16 +103,23 @@ margin-left:10px;
 let students=[]
 let className=""
 
-const avatars=[]
+const maleAvatars=[]
+const femaleAvatars=[]
 
-// 30개의 귀여운 캐릭터 생성
+/* 원피스 느낌 해적 캐릭터 생성 */
+
 for(let i=1;i<=30;i++){
-avatars.push(`https://api.dicebear.com/7.x/adventurer/svg?seed=${i}`)
+
+maleAvatars.push(`https://api.dicebear.com/7.x/adventurer/svg?seed=pirateboy${i}`)
+
+femaleAvatars.push(`https://api.dicebear.com/7.x/adventurer/svg?seed=pirategirl${i}`)
+
 }
 
-document.getElementById("upload").addEventListener("change", function(e){
+document.getElementById("upload").addEventListener("change",function(e){
 
 const file=e.target.files[0]
+
 const reader=new FileReader()
 
 reader.onload=function(){
@@ -101,22 +130,28 @@ students=[]
 
 rows.forEach((row,i)=>{
 
-let cols=row.split(",")
+let c=row.split(",")
 
-if(cols.length<5)return
+if(c.length<5)return
 
-let student={
-class:cols[0],
-number:cols[1],
-name:cols[2],
-count:parseInt(cols[3])||0,
-gender:cols[4],
-avatar:avatars[i%30]
-}
+let gender=c[4].trim()
 
-className=cols[0]
+let avatar=gender==="여"
+? femaleAvatars[i%30]
+: maleAvatars[i%30]
 
-students.push(student)
+students.push({
+
+class:c[0],
+number:c[1],
+name:c[2],
+count:parseInt(c[3])||0,
+gender:gender,
+avatar:avatar
+
+})
+
+className=c[0]
 
 })
 
@@ -132,33 +167,41 @@ reader.readAsText(file,"utf-8")
 
 function render(){
 
-const table=document.getElementById("table")
+const grid=document.getElementById("grid")
 
-table.innerHTML=""
+grid.innerHTML=""
 
-students.forEach((s,i)=>{
+/* TOP3 계산 */
 
-let tr=document.createElement("tr")
+let sorted=[...students].sort((a,b)=>b.count-a.count)
 
-let td=document.createElement("td")
+let top3=sorted.slice(0,3).map(s=>s.name)
 
-td.innerHTML=`
+students.slice(0,32).forEach((s,i)=>{
 
-<div class="student" onclick="addCount(${i})">
+let div=document.createElement("div")
+
+div.className="card"
+
+if(top3.includes(s.name) && s.count>0){
+
+div.classList.add("top")
+
+}
+
+div.onclick=()=>addCount(i)
+
+div.innerHTML=`
 
 <img class="avatar" src="${s.avatar}">
 
-${s.number}번 ${s.name}
+<div class="name">${s.number}번 ${s.name}</div>
 
-<span class="count">발표 ${s.count}</span>
-
-</div>
+<div class="count">발표 ${s.count}</div>
 
 `
 
-tr.appendChild(td)
-
-table.appendChild(tr)
+grid.appendChild(div)
 
 })
 
@@ -190,7 +233,7 @@ render()
 
 window.onbeforeunload=function(){
 
-return "저장하시겠습니까?"
+return "변경사항을 저장하시겠습니까?"
 
 }
 
