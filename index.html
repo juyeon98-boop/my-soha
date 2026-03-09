@@ -3,140 +3,134 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>소하중 발표 횟수 체크</title>
+<title>소하중 발표 관리</title>
 <style>
-body{
-font-family: Arial, sans-serif;
-background:#f2f5fb;
-margin:0;
-padding:30px;
-text-align:center;
-}
+body{font-family:Arial,sans-serif;background:#f4f6fb;margin:0;padding:20px;text-align:center}
+h1{margin-bottom:5px}
+p{margin-top:0;color:#555}
 
-h1{
-margin-bottom:10px;
-}
+#upload{margin:15px;padding:10px 16px;font-size:15px}
 
-#upload{
-margin:20px;
-padding:10px 16px;
-font-size:16px;
-}
+#top3{display:flex;justify-content:center;gap:20px;margin:20px 0;flex-wrap:wrap}
+.topCard{background:white;padding:12px 18px;border-radius:12px;box-shadow:0 4px 10px rgba(0,0,0,0.08);font-weight:bold}
 
-#grid{
-margin:auto;
-max-width:900px;
-display:grid;
-grid-template-columns:repeat(8,1fr);
-grid-template-rows:repeat(4,1fr);
-gap:20px;
-}
+#grid{margin:auto;max-width:1000px;display:grid;grid-template-columns:repeat(8,1fr);gap:16px}
 
-.card{
-cursor:pointer;
-padding:10px;
-border-radius:12px;
-background:white;
-box-shadow:0 4px 10px rgba(0,0,0,0.08);
-transition:transform 0.15s;
-}
+.card{cursor:pointer;padding:10px;border-radius:14px;background:white;box-shadow:0 4px 10px rgba(0,0,0,0.08);transition:transform 0.15s}
+.card:hover{transform:scale(1.05)}
 
-.card:hover{
-transform:scale(1.05);
-}
+.avatar{width:70px;height:70px;border-radius:50%;margin:auto;margin-bottom:6px;object-fit:cover}
 
-.avatar{
-width:80px;
-height:80px;
-border-radius:50%;
-margin:auto;
-margin-bottom:6px;
-object-fit:cover;
-}
+.name{font-weight:bold}
+.meta{font-size:12px;color:#666}
+.count{margin-top:4px;font-weight:bold}
 
-.name{
-font-weight:bold;
-}
+#chart{margin:40px auto;max-width:900px;background:white;padding:20px;border-radius:14px;box-shadow:0 4px 10px rgba(0,0,0,0.08)}
+.bar{height:20px;background:#6c8cff;margin:6px 0;border-radius:6px}
+.barLabel{font-size:13px;text-align:left}
 
-.count{
-color:#444;
-}
+button{margin-top:15px;padding:8px 14px;border:none;border-radius:8px;background:#4a6cf7;color:white;cursor:pointer}
+button:hover{opacity:0.9}
 
-.empty{
-visibility:hidden;
+@media(max-width:800px){
+#grid{grid-template-columns:repeat(4,1fr)}
 }
 </style>
 </head>
 <body>
 
-<h1>소하중학교 발표 횟수 체크</h1>
-<p>CSV 파일을 업로드하면 학생 목록이 나타납니다. (형식: 이름,횟수)</p>
+<h1>소하중학교 발표 관리</h1>
+<p>CSV 형식 : 반,번호,이름,횟수,성별</p>
 
 <input type="file" id="upload" accept=".csv" />
+<br>
+<button onclick="downloadCSV()">발표 기록 CSV 다운로드</button>
+
+<div id="top3"></div>
 
 <div id="grid"></div>
 
+<div id="chart">
+<h3>발표 횟수 그래프</h3>
+<div id="bars"></div>
+</div>
+
 <script>
 
-const girlAvatars = [
-"https://api.dicebear.com/7.x/adventurer/svg?seed=g1",
-"https://api.dicebear.com/7.x/adventurer/svg?seed=g2",
-"https://api.dicebear.com/7.x/adventurer/svg?seed=g3",
-"https://api.dicebear.com/7.x/adventurer/svg?seed=g4",
-"https://api.dicebear.com/7.x/adventurer/svg?seed=g5",
-"https://api.dicebear.com/7.x/adventurer/svg?seed=g6",
-"https://api.dicebear.com/7.x/adventurer/svg?seed=g7",
-"https://api.dicebear.com/7.x/adventurer/svg?seed=g8",
-"https://api.dicebear.com/7.x/adventurer/svg?seed=g9",
-"https://api.dicebear.com/7.x/adventurer/svg?seed=g10",
-"https://api.dicebear.com/7.x/adventurer/svg?seed=g11",
-"https://api.dicebear.com/7.x/adventurer/svg?seed=g12",
-"https://api.dicebear.com/7.x/adventurer/svg?seed=g13",
-"https://api.dicebear.com/7.x/adventurer/svg?seed=g14",
-"https://api.dicebear.com/7.x/adventurer/svg?seed=g15"
+const girlAvatars=[
+"https://api.dicebear.com/7.x/adventurer/svg?seed=girl1",
+"https://api.dicebear.com/7.x/adventurer/svg?seed=girl2",
+"https://api.dicebear.com/7.x/adventurer/svg?seed=girl3",
+"https://api.dicebear.com/7.x/adventurer/svg?seed=girl4",
+"https://api.dicebear.com/7.x/adventurer/svg?seed=girl5",
+"https://api.dicebear.com/7.x/adventurer/svg?seed=girl6",
+"https://api.dicebear.com/7.x/adventurer/svg?seed=girl7",
+"https://api.dicebear.com/7.x/adventurer/svg?seed=girl8",
+"https://api.dicebear.com/7.x/adventurer/svg?seed=girl9",
+"https://api.dicebear.com/7.x/adventurer/svg?seed=girl10",
+"https://api.dicebear.com/7.x/adventurer/svg?seed=girl11",
+"https://api.dicebear.com/7.x/adventurer/svg?seed=girl12",
+"https://api.dicebear.com/7.x/adventurer/svg?seed=girl13",
+"https://api.dicebear.com/7.x/adventurer/svg?seed=girl14",
+"https://api.dicebear.com/7.x/adventurer/svg?seed=girl15"
 ];
 
-const boyAvatars = [
-"https://api.dicebear.com/7.x/adventurer/svg?seed=b1",
-"https://api.dicebear.com/7.x/adventurer/svg?seed=b2",
-"https://api.dicebear.com/7.x/adventurer/svg?seed=b3",
-"https://api.dicebear.com/7.x/adventurer/svg?seed=b4",
-"https://api.dicebear.com/7.x/adventurer/svg?seed=b5",
-"https://api.dicebear.com/7.x/adventurer/svg?seed=b6",
-"https://api.dicebear.com/7.x/adventurer/svg?seed=b7",
-"https://api.dicebear.com/7.x/adventurer/svg?seed=b8",
-"https://api.dicebear.com/7.x/adventurer/svg?seed=b9",
-"https://api.dicebear.com/7.x/adventurer/svg?seed=b10",
-"https://api.dicebear.com/7.x/adventurer/svg?seed=b11",
-"https://api.dicebear.com/7.x/adventurer/svg?seed=b12",
-"https://api.dicebear.com/7.x/adventurer/svg?seed=b13",
-"https://api.dicebear.com/7.x/adventurer/svg?seed=b14",
-"https://api.dicebear.com/7.x/adventurer/svg?seed=b15"
+const boyAvatars=[
+"https://api.dicebear.com/7.x/adventurer/svg?seed=boy1",
+"https://api.dicebear.com/7.x/adventurer/svg?seed=boy2",
+"https://api.dicebear.com/7.x/adventurer/svg?seed=boy3",
+"https://api.dicebear.com/7.x/adventurer/svg?seed=boy4",
+"https://api.dicebear.com/7.x/adventurer/svg?seed=boy5",
+"https://api.dicebear.com/7.x/adventurer/svg?seed=boy6",
+"https://api.dicebear.com/7.x/adventurer/svg?seed=boy7",
+"https://api.dicebear.com/7.x/adventurer/svg?seed=boy8",
+"https://api.dicebear.com/7.x/adventurer/svg?seed=boy9",
+"https://api.dicebear.com/7.x/adventurer/svg?seed=boy10",
+"https://api.dicebear.com/7.x/adventurer/svg?seed=boy11",
+"https://api.dicebear.com/7.x/adventurer/svg?seed=boy12",
+"https://api.dicebear.com/7.x/adventurer/svg?seed=boy13",
+"https://api.dicebear.com/7.x/adventurer/svg?seed=boy14",
+"https://api.dicebear.com/7.x/adventurer/svg?seed=boy15"
 ];
 
-let avatars = [...girlAvatars, ...boyAvatars];
+const grid=document.getElementById("grid");
+const bars=document.getElementById("bars");
+const top3Div=document.getElementById("top3");
 
-const grid = document.getElementById("grid");
+let students=[];
 
+/* CSV 업로드 */
 
-document.getElementById("upload").addEventListener("change", function(e){
+document.getElementById("upload").addEventListener("change",function(e){
 
-const file = e.target.files[0];
-if(!file) return;
+const file=e.target.files[0];
+if(!file)return;
 
-const reader = new FileReader();
+const reader=new FileReader();
 
-reader.onload = function(event){
+reader.onload=function(event){
 
-const text = event.target.result;
-const rows = text.trim().split("\n");
+const text=event.target.result;
+const rows=text.trim().split("\n");
 
-let students = rows.map(r=>{
-let [name,count] = r.split(",");
-return {name:name.trim(), count:parseInt(count)||0};
+students=rows.map(r=>{
+let [cls,num,name,count,gender]=r.split(",");
+
+let id=cls.trim()+"-"+num.trim()+"-"+name.trim();
+let saved=localStorage.getItem(id);
+
+return{
+class:cls.trim(),
+number:num.trim(),
+name:name.trim(),
+count:saved?parseInt(saved):parseInt(count)||0,
+gender:gender.trim(),
+id:id
+};
+
 });
 
-renderStudents(students);
+updateAll();
 
 };
 
@@ -144,37 +138,55 @@ reader.readAsText(file);
 
 });
 
+function updateAll(){
+render();
+renderTop3();
+renderChart();
+}
 
-function renderStudents(students){
+function render(){
+
+students.sort((a,b)=>b.count-a.count);
 
 grid.innerHTML="";
 
 for(let i=0;i<32;i++){
 
-if(i < students.length){
+if(i<students.length){
 
-let s = students[i];
-let avatar = avatars[i % avatars.length];
+let s=students[i];
 
-let card = document.createElement("div");
+let avatar;
+
+if(s.gender=="여"||s.gender.toLowerCase()=="f"){
+avatar=girlAvatars[i%girlAvatars.length];
+}else{
+avatar=boyAvatars[i%boyAvatars.length];
+}
+
+let card=document.createElement("div");
 card.className="card";
 
 card.innerHTML=`
 <img class="avatar" src="${avatar}">
 <div class="name">${s.name}</div>
+<div class="meta">${s.class}반 ${s.number}번</div>
 <div class="count">${s.count}회</div>
 `;
 
 card.addEventListener("click",()=>{
+
 s.count++;
-card.querySelector(".count").innerText = s.count + "회";
+localStorage.setItem(s.id,s.count);
+updateAll();
+
 });
 
 grid.appendChild(card);
 
 }else{
-let empty = document.createElement("div");
-empty.className="empty";
+let empty=document.createElement("div");
+empty.style.visibility="hidden";
 grid.appendChild(empty);
 }
 
@@ -182,7 +194,50 @@ grid.appendChild(empty);
 
 }
 
-</script>
+function renderTop3(){
 
-</body>
-</html>
+let sorted=[...students].sort((a,b)=>b.count-a.count).slice(0,3);
+
+top3Div.innerHTML="";
+
+sorted.forEach((s,i)=>{
+let div=document.createElement("div");
+div.className="topCard";
+div.innerText=`🏆 ${i+1}위 ${s.name} (${s.count}회)`;
+top3Div.appendChild(div);
+});
+
+}
+
+function renderChart(){
+
+bars.innerHTML="";
+
+let max=Math.max(...students.map(s=>s.count),1);
+
+students.slice(0,10).forEach(s=>{
+
+let label=document.createElement("div");
+label.className="barLabel";
+label.innerText=s.name+" ("+s.count+")";
+
+let bar=document.createElement("div");
+bar.className="bar";
+bar.style.width=(s.count/max*100)+"%";
+
+bars.appendChild(label);
+bars.appendChild(bar);
+
+});
+
+}
+
+function downloadCSV(){
+
+let rows=["반,번호,이름,횟수,성별"];
+
+students.forEach(s=>{
+rows.push(`${s.class},${s.number},${s.name},${s.count},${s.gender}`);
+});
+
+l
