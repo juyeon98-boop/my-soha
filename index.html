@@ -36,7 +36,6 @@ gap:10px;
 }
 
 .card{
-
 background:white;
 border-radius:20px;
 padding:10px;
@@ -45,7 +44,6 @@ display:flex;
 flex-direction:column;
 align-items:center;
 justify-content:center;
-
 transition:0.2s;
 }
 
@@ -70,19 +68,28 @@ color:#0984e3;
 font-size:16px;
 }
 
-/* TOP3 효과 */
-
 .top{
 animation:glow 1.5s infinite alternate;
 }
 
 @keyframes glow{
-from{
-box-shadow:0 0 10px #ffd700;
+from{box-shadow:0 0 10px gold;}
+to{box-shadow:0 0 25px gold;}
 }
-to{
-box-shadow:0 0 25px #ffd700;
+
+button{
+margin-top:20px;
+padding:10px 20px;
+font-size:16px;
+border:none;
+border-radius:10px;
+background:#74b9ff;
+color:white;
+cursor:pointer;
 }
+
+button:hover{
+background:#0984e3;
 }
 
 </style>
@@ -96,25 +103,27 @@ box-shadow:0 0 25px #ffd700;
 
 <div id="grid"></div>
 
-<button onclick="downloadCSV()">저장하기</button>
+<button onclick="downloadCSV()">CSV 저장</button>
 
 <script>
 
 let students=[]
+let originalRows=[]
 let className=""
 
 const maleAvatars=[]
 const femaleAvatars=[]
 
-/* 원피스 느낌 해적 캐릭터 생성 */
+/* 캐릭터 생성 */
 
 for(let i=1;i<=30;i++){
 
 maleAvatars.push(`https://api.dicebear.com/7.x/adventurer/svg?seed=pirateboy${i}`)
-
 femaleAvatars.push(`https://api.dicebear.com/7.x/adventurer/svg?seed=pirategirl${i}`)
 
 }
+
+/* CSV 업로드 */
 
 document.getElementById("upload").addEventListener("change",function(e){
 
@@ -125,7 +134,7 @@ reader.onload=function(){
 
 const text=reader.result.trim()
 
-originalRows=text.split(/\r?\n/)   // 원본 구조 저장
+originalRows=text.split(/\r?\n/)
 
 let rows=originalRows.slice(1)
 
@@ -165,90 +174,75 @@ render()
 reader.readAsText(file,"utf-8")
 
 })
+
+/* 화면 그리기 */
+
 function render(){
 
 const grid=document.getElementById("grid")
-
 grid.innerHTML=""
 
-/* TOP3 계산 */
-
 let sorted=[...students].sort((a,b)=>b.count-a.count)
-
 let top3=sorted.slice(0,3).map(s=>s.name)
 
 students.slice(0,32).forEach((s,i)=>{
 
-let div=document.createElement("div")
+let card=document.createElement("div")
 
-div.className="card"
+card.className="card"
 
 if(top3.includes(s.name) && s.count>0){
-
-div.classList.add("top")
-
+card.classList.add("top")
 }
 
-div.onclick=()=>addCount(i)
+card.onclick=(event)=>handleClick(event,i)
 
-div.innerHTML=`
+card.innerHTML=`
 
 <img class="avatar" src="${s.avatar}">
-
 <div class="name">${s.number}번 ${s.name}</div>
-
 <div class="count">발표 ${s.count}</div>
 
 `
 
-grid.appendChild(div)
+grid.appendChild(card)
 
 })
 
 }
 
-function addCount(i){
+/* 클릭 처리 */
+
+function handleClick(event,i){
+
+if(event.shiftKey){
+
+if(students[i].count>0){
+students[i].count--
+}
+
+}else{
 
 students[i].count++
 
-render()
-
-localStorage.setItem("students",JSON.stringify(students))
-
 }
-
-window.onload=function(){
-
-let saved=localStorage.getItem("students")
-
-if(saved){
-
-students=JSON.parse(saved)
 
 render()
 
 }
 
-}
-
-window.onbeforeunload=function(){
-
-return "변경사항을 저장하시겠습니까?"
-
-}
+/* CSV 저장 */
 
 function downloadCSV(){
 
 let newRows=[]
 
-/* 헤더 그대로 유지 */
 newRows.push(originalRows[0])
 
 students.forEach((s,i)=>{
 
 let cols=originalRows[i+1].split(",")
 
-/* 발표횟수(4번째 열)만 수정 */
 cols[3]=s.count
 
 newRows.push(cols.join(","))
@@ -257,7 +251,6 @@ newRows.push(cols.join(","))
 
 let csv=newRows.join("\n")
 
-/* UTF-8 BOM 추가 → Excel 한글 깨짐 방지 */
 let blob=new Blob(["\uFEFF"+csv],{type:"text/csv;charset=utf-8;"})
 
 let link=document.createElement("a")
