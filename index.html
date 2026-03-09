@@ -111,9 +111,24 @@ const reader=new FileReader();
 reader.onload=function(event){
 
 const text=event.target.result;
-const rows=text.trim().split("\n");
+
+// 줄바꿈 호환 (윈도우/맥)
+let rows=text.trim().split(/
+?
+/);
+
+// 헤더 제거 (첫 줄이 '반,번호,이름,횟수,성별' 인 경우)
+if(rows[0].includes("반") && rows[0].includes("이름")){
+rows = rows.slice(1);
+}
 
 students=rows.map(r=>{
+
+// 공백 및 CR 제거
+r = r.replace(/
+/g,"");
+
+let [cls,num,name,count,gender]=r.split(",");
 let [cls,num,name,count,gender]=r.split(",");
 
 let id=cls.trim()+"-"+num.trim()+"-"+name.trim();
@@ -240,4 +255,16 @@ students.forEach(s=>{
 rows.push(`${s.class},${s.number},${s.name},${s.count},${s.gender}`);
 });
 
-l
+let blob=new Blob([rows.join("\n")],{type:"text/csv"});
+
+let a=document.createElement("a");
+a.href=URL.createObjectURL(blob);
+a.download="presentation_counts.csv";
+a.click();
+
+}
+
+</script>
+
+</body>
+</html>
