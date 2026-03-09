@@ -113,9 +113,7 @@ reader.onload=function(event){
 const text=event.target.result;
 
 // 줄바꿈 호환 (윈도우/맥)
-let rows=text.trim().split(/
-?
-/);
+let rows = text.trim().split(/\r?\n/);
 
 // 헤더 제거 (첫 줄이 '반,번호,이름,횟수,성별' 인 경우)
 if(rows[0].includes("반") && rows[0].includes("이름")){
