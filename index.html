@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>소하중학교 발표 체크리스트</title>
+<style>
+body{font-family:Arial, sans-serif;background:#f4f6fb;margin:0;padding:30px}
+.container{max-width:800px;margin:auto;background:white;padding:30px;border-radius:12px;box-shadow:0 8px 20px rgba(0,0,0,0.08)}
+h1{text-align:center}
+.student{margin-bottom:20px}
+.checklist{margin-top:20px}
+.item{display:flex;align-items:center;margin:10px 0}
+.score{font-size:22px;font-weight:bold;text-align:center;margin-top:20px}
+button{margin-top:20px;padding:10px 20px;font-size:16px;border:none;border-radius:8px;background:#4a6cf7;color:white;cursor:pointer}
+button:hover{opacity:0.9}
+</style>
+</head>
+<body>
+
+<div class="container">
+<h1>소하중학교 학생 발표 체크리스트</h1>
+
+<div class="student">
+<label>학생 이름: </label>
+<input type="text" id="studentName" placeholder="이름 입력" />
+</div>
+
+<div class="checklist">
+<h3>발표 평가 항목</h3>
+
+<div class="item">
+<input type="checkbox" class="check" /> 내용이 정확하다
+</div>
+
+<div class="item">
+<input type="checkbox" class="check" /> 목소리가 잘 들린다
+</div>
+
+<div class="item">
+<input type="checkbox" class="check" /> 발표 구조가 잘 정리되어 있다
+</div>
+
+<div class="item">
+<input type="checkbox" class="check" /> 시각자료를 잘 활용했다
+</div>
+
+<div class="item">
+<input type="checkbox" class="check" /> 시간을 잘 지켰다
+</div>
+
+</div>
+
+<button onclick="calculateScore()">점수 계산</button>
+
+<div class="score" id="scoreResult"></div>
+
+</div>
+
+<script>
+function calculateScore(){
+let checks=document.querySelectorAll('.check');
+let score=0;
+checks.forEach(c=>{if(c.checked)score+=20});
+let name=document.getElementById('studentName').value || '학생';
+
+document.getElementById('scoreResult').innerText=
+name+' 발표 점수: '+score+'점 / 100점';
+}
+</script>
+
+</body>
+</
