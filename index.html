@@ -1,73 +1,161 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>소하중학교 발표 체크리스트</title>
-<style>
-body{font-family:Arial, sans-serif;background:#f4f6fb;margin:0;padding:30px}
-.container{max-width:800px;margin:auto;background:white;padding:30px;border-radius:12px;box-shadow:0 8px 20px rgba(0,0,0,0.08)}
-h1{text-align:center}
-.student{margin-bottom:20px}
-.checklist{margin-top:20px}
-.item{display:flex;align-items:center;margin:10px 0}
-.score{font-size:22px;font-weight:bold;text-align:center;margin-top:20px}
-button{margin-top:20px;padding:10px 20px;font-size:16px;border:none;border-radius:8px;background:#4a6cf7;color:white;cursor:pointer}
-button:hover{opacity:0.9}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>소하중학교 2학년 정보교과 발표 체크리스트</title>
+    <link href="https://fonts.googleapis.com/css2?family=Jua&display=swap" rel="stylesheet">
+    <style>
+        :root { --bg-color: #f7f9fc; --primary-color: #34495e; --accent-color: #2c3e50; }
+        body { font-family: 'Malgun Gothic', sans-serif; background-color: var(--bg-color); margin: 0; padding: 10px; display: flex; flex-direction: column; height: 100vh; overflow: hidden; align-items: center; }
+        
+        #headline-bar {
+            display: flex; align-items: center; justify-content: center;
+            background-color: white; padding: 25px; border-radius: 15px;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.1); margin-bottom: 15px;
+            border-bottom: 6px solid var(--accent-color);
+            width: 95%; box-sizing: border-box;
+        }
+        .headline-title {
+            font-family: 'Jua', sans-serif; font-size: 3rem; color: var(--accent-color); margin: 0;
+        }
+
+        #control-bar {
+            width: 95%; height: 50px; display: flex; align-items: center; justify-content: space-between;
+            background: rgba(255,255,255,0.9); padding: 0 20px; border-radius: 10px;
+            margin-bottom: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); box-sizing: border-box;
+        }
+        .btn-save { background-color: #27ae60; color: white; border: none; padding: 8px 18px; border-radius: 8px; cursor: pointer; font-weight: bold; transition: 0.3s; }
+        .btn-save:hover { background-color: #219150; transform: scale(1.05); }
+
+        .grid-container {
+            display: grid; grid-template-columns: repeat(8, 1fr); grid-template-rows: repeat(4, 1fr);
+            gap: 12px; flex-grow: 1; width: 95%; margin-bottom: 10px;
+        }
+
+        .student-card { background: white; border-radius: 18px; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; position: relative; transition: all 0.3s ease; border: 4px solid transparent; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        .student-card:hover { transform: translateY(-3px); box-shadow: 0 8px 20px rgba(0,0,0,0.1); }
+
+        .card-orange { border-color: #e67e22 !important; background-color: #fffaf5; }
+        .card-red { border-color: #e74c3c !important; background-color: #fff5f5; animation: pulse-red 1.5s infinite alternate; }
+
+        @keyframes pulse-red { from { box-shadow: 0 0 10px rgba(231, 76, 60, 0.4); } to { box-shadow: 0 0 25px rgba(231, 76, 60, 0.7); } }
+
+        .avatar-img { width: 55%; aspect-ratio: 1/1; border-radius: 50%; margin-bottom: 5px; background-color: #f0f0f0; }
+        .name { font-size: 1.2vw; font-weight: bold; color: #333; }
+        .class-no { font-size: 0.8vw; color: #888; }
+        
+        .count-badge { position: absolute; top: 10px; right: 10px; background: #34495e; color: white; padding: 3px 12px; border-radius: 15px; font-weight: bold; font-size: 1.1vw; }
+        .card-red .count-badge { background: #e74c3c; }
+    </style>
 </head>
 <body>
 
-<div class="container">
-<h1>소하중학교 학생 발표 체크리스트</h1>
-
-<div class="student">
-<label>학생 이름: </label>
-<input type="text" id="studentName" placeholder="이름 입력" />
+<div id="headline-bar">
+    <h1 class="headline-title">소하중학교 2학년 정보교과 발표 체크리스트</h1>
 </div>
 
-<div class="checklist">
-<h3>발표 평가 항목</h3>
-
-<div class="item">
-<input type="checkbox" class="check" /> 내용이 정확하다
+<div id="control-bar">
+    <div>
+        <strong>CSV 불러오기: </strong>
+        <input type="file" id="csvFile" accept=".csv">
+    </div>
+    <div id="file-info" style="font-size: 0.9rem; color: #666; font-weight: bold;"></div>
+    <button class="btn-save" onclick="saveFile()">저장 위치 선택하여 저장</button>
 </div>
 
-<div class="item">
-<input type="checkbox" class="check" /> 목소리가 잘 들린다
-</div>
-
-<div class="item">
-<input type="checkbox" class="check" /> 발표 구조가 잘 정리되어 있다
-</div>
-
-<div class="item">
-<input type="checkbox" class="check" /> 시각자료를 잘 활용했다
-</div>
-
-<div class="item">
-<input type="checkbox" class="check" /> 시간을 잘 지켰다
-</div>
-
-</div>
-
-<button onclick="calculateScore()">점수 계산</button>
-
-<div class="score" id="scoreResult"></div>
-
+<div class="grid-container" id="grid">
+    <div style="grid-column: span 8; text-align: center; padding-top: 100px; color: #bbb; font-size: 1.5rem; font-family: 'Jua', sans-serif;">
+        CSV 파일을 불러오면 명렬표가 나타납니다!
+    </div>
 </div>
 
 <script>
-function calculateScore(){
-let checks=document.querySelectorAll('.check');
-let score=0;
-checks.forEach(c=>{if(c.checked)score+=20});
-let name=document.getElementById('studentName').value || '학생';
+    let studentData = [];
+    let originalPrefix = ""; 
+    const grid = document.getElementById('grid');
 
-document.getElementById('scoreResult').innerText=
-name+' 발표 점수: '+score+'점 / 100점';
-}
+    document.getElementById('csvFile').addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+        const fileName = file.name;
+        const match = fileName.match(/^(\d+)/);
+        originalPrefix = match ? match[1] : "소하중_발표";
+        document.getElementById('file-info').innerText = `파일명: ${fileName}`;
+        const reader = new FileReader();
+        reader.readAsText(file, 'CP949'); 
+        reader.onload = function(event) {
+            const text = event.target.result;
+            const rows = text.trim().split(/\r?\n/);
+            grid.innerHTML = '';
+            studentData = [];
+            rows.forEach((row, index) => {
+                const cols = row.split(',');
+                if (cols.length >= 5 && index < 32) {
+                    const student = {
+                        class: cols[0].trim(), no: cols[1].trim(), name: cols[2].trim(),
+                        count: parseInt(cols[3]) || 0, gender: cols[4].trim()
+                    };
+                    studentData.push(student);
+                    createCard(student, index);
+                }
+            });
+        };
+    });
+
+    function createCard(data, index) {
+        const card = document.createElement('div');
+        card.id = `card-${index}`;
+        updateCardStyle(card, data.count);
+        const imgSeed = data.gender === '남' ? `male-${encodeURIComponent(data.name)}` : `female-${encodeURIComponent(data.name)}`;
+        const imgUrl = `https://api.dicebear.com/7.x/avataaars-neutral/svg?seed=${imgSeed}`;
+        card.innerHTML = `<div class="count-badge" id="count-${index}">${data.count}</div><img class="avatar-img" src="${imgUrl}"><div class="info"><div class="class-no">${data.class}반 ${data.no}번</div><div class="name">${data.name}</div></div>`;
+        card.onclick = () => {
+            studentData[index].count++;
+            document.getElementById(`count-${index}`).innerText = studentData[index].count;
+            updateCardStyle(card, studentData[index].count);
+        };
+        grid.appendChild(card);
+    }
+
+    function updateCardStyle(card, count) {
+        card.className = 'student-card'; 
+        if (count > 30) card.classList.add('card-red');
+        else if (count > 10) card.classList.add('card-orange');
+    }
+
+    // 파일 저장 핵심 기능
+    async function saveFile() {
+        if (studentData.length === 0) return alert("데이터가 없습니다.");
+        
+        let csvContent = studentData.map(s => `${s.class},${s.no},${s.name},${s.count},${s.gender}`).join('\n');
+        const today = new Date();
+        const dateStr = today.getFullYear() + String(today.getMonth() + 1).padStart(2, '0') + String(today.getDate()).padStart(2, '0');
+        const suggestedName = `${originalPrefix}_${dateStr}.csv`;
+
+        // 1. 최신 브라우저를 위한 '저장 위치 선택' 창 띄우기
+        if (window.showSaveFilePicker) {
+            try {
+                const handle = await window.showSaveFilePicker({
+                    suggestedName: suggestedName,
+                    types: [{ description: 'CSV File', accept: { 'text/csv': ['.csv'] } }]
+                });
+                const writable = await handle.createWritable();
+                await writable.write("\ufeff" + csvContent);
+                await writable.close();
+                alert("저장되었습니다!");
+            } catch (err) { console.log("저장 취소 또는 에러"); }
+        } 
+        // 2. 지원하지 않는 브라우저를 위한 일반 다운로드 방식
+        else {
+            const blob = new Blob(["\ufeff" + csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.download = suggestedName;
+            link.click();
+        }
+    }
 </script>
-
 </body>
-</
+</html>
+
