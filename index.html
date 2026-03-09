@@ -239,19 +239,79 @@ return "변경사항을 저장하시겠습니까?"
 
 function downloadCSV(){
 
-let csv="반,번호,이름,발표횟수,성별\n"
+let originalRows = []
 
-students.forEach(s=>{
+document.getElementById("upload").addEventListener("change",function(e){
 
-csv+=`${s.class},${s.number},${s.name},${s.count},${s.gender}\n`
+const file=e.target.files[0]
+const reader=new FileReader()
+
+reader.onload=function(){
+
+let text=reader.result.trim()
+
+originalRows=text.split("\n")
+
+let rows=originalRows.slice(1)
+
+students=[]
+
+rows.forEach((row,i)=>{
+
+let c=row.split(",")
+
+if(c.length<5)return
+
+students.push({
+
+class:c[0],
+number:c[1],
+name:c[2],
+count:parseInt(c[3])||0,
+gender:c[4]
 
 })
 
-let blob=new Blob([csv],{type:"text/csv"})
+className=c[0]
+
+})
+
+render()
+
+}
+
+reader.readAsText(file,"utf-8")
+
+})
+
+function downloadCSV(){
+
+let newRows=[originalRows[0]] // 헤더 유지
+
+students.forEach((s,i)=>{
+
+let cols=originalRows[i+1].split(",")
+
+cols[3]=s.count   // 횟수만 변경
+
+newRows.push(cols.join(","))
+
+})
+
+let csv=newRows.join("\n")
+
+/* UTF8 BOM 추가 → 한글 안깨짐 */
+let blob=new Blob(["\uFEFF"+csv],{type:"text/csv;charset=utf-8;"})
 
 let link=document.createElement("a")
 
-let date=new Date().toISOString().slice(0,10)
+let today=new Date()
+
+let yy=String(today.getFullYear()).slice(2)
+let mm=String(today.getMonth()+1).padStart(2,"0")
+let dd=String(today.getDate()).padStart(2,"0")
+
+let date=yy+mm+dd
 
 link.download=`${className}_${date}.csv`
 
